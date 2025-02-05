@@ -7,19 +7,30 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-const functions = require("firebase-functions");
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
 const { VertexAI } = require("@google-cloud/vertexai");
+const { log } = require("firebase-functions/logger");
 const app = express();
 
 // すべてのオリジンを許可（* を使用）
 app.use(cors({ origin: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
+
+app.get("/", (req, res) => {
+    res.send("Hello, World!")
+})
+
+app.get("/ping", (req, res) => {
+    res.json({ result: true })
+})
 
 app.post("/proxy", async (req, res) => {
     try {
         const url = req.body.url;
+        console.log(`Fetching ${url}`);
         const response = await fetch(url);
         const data = await response.json();
 
@@ -48,7 +59,7 @@ app.post("/ask-gemini", async (req, res) => {
         // Vertex AIの初期化
         const vertexAI = new VertexAI({
             project: process.env.GOOGLE_PROJECT_ID,
-            location: "us-central1",
+            location: "asia-east1",
         });
 
         // Geminiモデルの取得
@@ -71,4 +82,7 @@ app.post("/ask-gemini", async (req, res) => {
     }
 });
 
-exports.api = functions.https.onRequest(app);
+const port = parseInt(process.env.PORT) || 8080;
+app.listen(port, () => {
+    console.log(`helloworld: listening on port ${port}`);
+});
