@@ -1,7 +1,7 @@
 const { VertexAI } = require("@google-cloud/vertexai");
 
 class GeminiService {
-    async generateContent(prompt) {
+    async generateContent(customPrompt, prompt) {
         // Vertex AIの初期化
         const vertexAI = new VertexAI({
             project: process.env.GOOGLE_PROJECT_ID,
@@ -11,6 +11,7 @@ class GeminiService {
         // Geminiモデルの取得
         const model = vertexAI.preview.getGenerativeModel({
             model: "gemini-1.5-flash-002",
+            systemInstruction: customPrompt,
         });
 
         // 生成リクエストの実行
@@ -19,8 +20,11 @@ class GeminiService {
         const response = result.response.candidates[0].content.parts[0].text;
 
         try {
-            const content = response.replace(/"/g, "").replace(/\\n/g, "\n");
-            return content;
+            const content = response.substring(
+                response.indexOf("{"),
+                response.lastIndexOf("}") + 1
+            );
+            return JSON.parse(content);
         } catch (e) {
             throw new Error(`AIからのレスポンスの解析に失敗しました: ${e}`);
         }
