@@ -32,9 +32,11 @@ class ZennService {
         const responseBody = await response.json();
         const article = responseBody["article"];
         const bodyHtml = article["body_html"] || "";
-        const plainText = this.removeHtmlTags(bodyHtml);
+        const plainText = `{"title": "${article["title"]}", "published_at": "${
+            article["published_at"]
+        }", "body": "${this.removeHtmlTags(bodyHtml)}"},`;
 
-        return plainText;
+        return `{articles: [${plainText}]}`;
     }
 
     removeHtmlTags(html) {

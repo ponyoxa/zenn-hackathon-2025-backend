@@ -10,13 +10,19 @@ class AiAnalysisUseCase {
 
         const zennArticles = await zennService.fetchArticles(zennAccount);
 
+        const customPrompt = promptService.getCustomPrompt();
+
         const prompt = promptService.generatePrompt(
             desiredLevel,
             futureImage,
+            zennAccount,
             zennArticles
         );
 
-        const response = await geminiService.generateContent(prompt);
+        const response = await geminiService.generateContent(
+            customPrompt,
+            prompt
+        );
 
         return response;
     }
